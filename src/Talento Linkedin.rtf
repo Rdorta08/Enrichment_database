@@ -1,0 +1,809 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 import React, \{ useState, useEffect, useMemo, useCallback, useRef \} from 'react';\
+import \{ \
+  Upload, \
+  Download, \
+  FileJson, \
+  ChevronDown, \
+  ChevronRight, \
+  ExternalLink, \
+  Copy, \
+  Check, \
+  Trash2, \
+  Search, \
+  Filter,\
+  Keyboard,\
+  Info,\
+  MapPin,\
+  Building2,\
+  GraduationCap,\
+  AlertTriangle,\
+  Target,\
+  ArrowRight,\
+  X,\
+  Plus,\
+  RefreshCw,\
+  CheckSquare,\
+  Square,\
+  Layers,\
+  Type,\
+  PieChart,\
+  Activity,\
+  Clock,\
+  Globe,\
+  BarChart3,\
+  TrendingUp,\
+  Table,\
+  FileText,\
+  Database,\
+  SlidersHorizontal,\
+  Hash,\
+  ListFilter,\
+  Heart,\
+  Linkedin\
+\} from 'lucide-react';\
+\
+// === ESTILOS CSS ADICIONALES (Scrollbars Minimalistas) ===\
+const styleSheet = `\
+  .custom-scrollbar::-webkit-scrollbar \{\
+    width: 6px;\
+  \}\
+  .custom-scrollbar::-webkit-scrollbar-track \{\
+    background: transparent;\
+  \}\
+  .custom-scrollbar::-webkit-scrollbar-thumb \{\
+    background: #334155;\
+    border-radius: 10px;\
+  \}\
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover \{\
+    background: #475569;\
+  \}\
+  .custom-scrollbar \{\
+    scrollbar-width: thin;\
+    scrollbar-color: #334155 transparent;\
+  \}\
+`;\
+\
+// === DATOS GEOGR\'c1FICOS ACTUALIZADOS ===\
+const REGIONS_DATA = [\
+  \{ name: "Andaluc\'eda", code: "106151489", cities: [\{ name: "Sevilla", code: "90009810" \}, \{ name: "M\'e1laga", code: "90009791" \}, \{ name: "C\'f3rdoba", code: "90009770" \}, \{ name: "Granada", code: "90009778" \}, \{ name: "Jerez", code: "90009784" \}, \{ name: "Almer\'eda", code: "90009757" \}, \{ name: "Huelva", code: "90009781" \}, \{ name: "Algeciras", code: "90009755" \}, \{ name: "Ja\'e9n", code: "90009783" \}, \{ name: "C\'e1diz", code: "90009766" \}, \{ name: "Fuengirola", code: "90009774" \}, \{ name: "Marbella", code: "90009793" \}] \},\
+  \{ name: "Arag\'f3n", code: "102312719", cities: [\{ name: "Zaragoza", code: "90009822" \}] \},\
+  \{ name: "Asturias", code: "104351060", cities: [\{ name: "Gij\'f3n", code: "90009776" \}, \{ name: "Oviedo", code: "90009797" \}, \{ name: "Avil\'e9s", code: "90009759" \}] \},\
+  \{ name: "Islas Baleares", code: "101388828", cities: [\{ name: "Palma de Mallorca", code: "90009799" \}, \{ name: "Ibiza", code: "106615351" \}] \},\
+  \{ name: "Canarias", code: "102102005", cities: [\{ name: "Las Palmas", code: "90009785" \}, \{ name: "Santa Cruz de Tenerife", code: "90009807" \}, \{ name: "Arrecife", code: "90009758" \}] \},\
+  \{ name: "Cantabria", code: "106413664", cities: [\{ name: "Santander", code: "90009808" \}] \},\
+  \{ name: "Castilla-La Mancha", code: "100096545", cities: [\{ name: "Albacete", code: "90009754" \}, \{ name: "Toledo", code: "90009814" \}, \{ name: "Guadalajara", code: "90009780" \}, \{ name: "Ciudad Real", code: "90009769" \}, \{ name: "Talavera de la Reina", code: "90009811" \}] \},\
+  \{ name: "Castilla y Le\'f3n", code: "104802667", cities: [\{ name: "Valladolid", code: "90009817" \}, \{ name: "Burgos", code: "90009764" \}, \{ name: "Salamanca", code: "90009805" \}, \{ name: "Le\'f3n", code: "90009786" \}, \{ name: "Palencia", code: "90009798" \}, \{ name: "Zamora", code: "90009821" \}, \{ name: "Ponferrada", code: "90009801" \}] \},\
+  \{ name: "Catalu\'f1a", code: "100377885", cities: [\{ name: "Barcelona", code: "90009761" \}, \{ name: "Tarragona", code: "90009812" \}, \{ name: "L\'e9rida", code: "90009787" \}, \{ name: "Gerona", code: "90009777" \}, \{ name: "Sabadell", code: "90009804" \}, \{ name: "Tarrasa", code: "90009813" \}, \{ name: "Matar\'f3", code: "90009794" \}, \{ name: "Granollers", code: "90009779" \}, \{ name: "Manresa", code: "90009792" \}, \{ name: "Reus", code: "90009803" \}, \{ name: "Villanueva y la Geltr\'fa", code: "90009819" \}] \},\
+  \{ name: "Comunidad Valenciana", code: "100076887", cities: [\{ name: "Valencia", code: "90009816" \}, \{ name: "Alicante", code: "90009756" \}, \{ name: "Elche", code: "90009771" \}, \{ name: "Castell\'f3n", code: "90009768" \}, \{ name: "Torrevieja", code: "90009815" \}, \{ name: "Gand\'eda", code: "90009775" \}, \{ name: "Benidorm", code: "90009762" \}, \{ name: "Elda", code: "90009772" \}] \},\
+  \{ name: "Extremadura", code: "102727695", cities: [\{ name: "Badajoz", code: "90009760" \}, \{ name: "C\'e1ceres", code: "90009765" \}] \},\
+  \{ name: "Galicia", code: "103189018", cities: [\{ name: "Vigo", code: "90009818" \}, \{ name: "La Coru\'f1a", code: "90009753" \}, \{ name: "Santiago de Compostela", code: "90009809" \}, \{ name: "Orense", code: "90009796" \}, \{ name: "Lugo", code: "90009789" \}, \{ name: "Pontevedra", code: "90009802" \}, \{ name: "Ferrol", code: "90009773" \}] \},\
+  \{ name: "Madrid", code: "103335767", cities: [\{ name: "Madrid Capital", code: "90009790" \}] \},\
+  \{ name: "Regi\'f3n de Murcia", code: "106901295", cities: [\{ name: "Murcia", code: "90009795" \}, \{ name: "Cartagena", code: "90009767" \}] \},\
+  \{ name: "Navarra", code: "102688677", cities: [\{ name: "Pamplona", code: "90009800" \}] \},\
+  \{ name: "Pa\'eds Vasco", code: "104405604", cities: [\{ name: "Bilbao", code: "90009763" \}, \{ name: "Vitoria", code: "90009820" \}, \{ name: "San Sebasti\'e1n", code: "90009806" \}, \{ name: "Ir\'fan", code: "90009782" \}] \},\
+  \{ name: "La Rioja", code: "106048103", cities: [\{ name: "Logro\'f1o", code: "90009788" \}] \},\
+  \{ name: "Ceuta", code: "105561708", cities: [] \},\
+  \{ name: "Melilla", "code": "104036146", cities: [] \}\
+];\
+\
+const ALUMNI_RANGES = [\
+  \{ label: "Todos los rangos", min: 0, max: Infinity \},\
+  \{ label: "0 a 150", min: 0, max: 150 \},\
+  \{ label: "151 a 500", min: 151, max: 500 \},\
+  \{ label: "501 a 1000", min: 501, max: 1000 \},\
+  \{ label: "1001 a 2000", min: 1001, max: 2000 \},\
+  \{ label: "2001 a 3000", min: 2001, max: 3000 \},\
+  \{ label: "3001 a 5000", min: 3001, max: 5000 \},\
+  \{ label: "5001 a 8000", min: 5001, max: 8000 \},\
+  \{ label: "+ de 8001", min: 8001, max: Infinity \}\
+];\
+\
+export default function App() \{\
+  // --- ESTADOS ---\
+  const [universities, setUniversities] = useState([]);\
+  const [currentIndex, setCurrentIndex] = useState(0);\
+  const [filters, setFilters] = useState(\{ country: '', minAlumni: 0, alumniRangeIndex: 0, searchId: '' \});\
+  const [selectionMap, setSelectionMap] = useState(\{\});\
+  const [expandedRegions, setExpandedRegions] = useState([]);\
+  const [toast, setToast] = useState(null);\
+  const [showStatsModal, setShowStatsModal] = useState(false);\
+  const [showDataModal, setShowDataModal] = useState(false);\
+  const [searchTerm, setSearchTerm] = useState('');\
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);\
+  const [isWaitingForCount, setIsWaitingForCount] = useState(false);\
+  const [countInputValue, setCountInputValue] = useState('');\
+  const [lastCountResult, setLastCountResult] = useState(null);\
+  const [isAdjustingFilters, setIsAdjustingFilters] = useState(false);\
+\
+  const searchRef = useRef(null);\
+\
+  // --- HELPERS (DEFINIDOS AL INICIO) ---\
+  const getFlagEmoji = useCallback((countryName) => \{\
+    if (!countryName) return '\uc0\u55356 \u57102 ';\
+    const flags = \{\
+      'Argentina': '\uc0\u55356 \u56806 \u55356 \u56823 ', 'Bolivia': '\u55356 \u56807 \u55356 \u56820 ', 'Brasil': '\u55356 \u56807 \u55356 \u56823 ', 'Chile': '\u55356 \u56808 \u55356 \u56817 ', 'Colombia': '\u55356 \u56808 \u55356 \u56820 ',\
+      'Costa Rica': '\uc0\u55356 \u56808 \u55356 \u56823 ', 'Cuba': '\u55356 \u56808 \u55356 \u56826 ', 'Ecuador': '\u55356 \u56810 \u55356 \u56808 ', 'El Salvador': '\u55356 \u56824 \u55356 \u56827 ', 'Espa\'f1a': '\u55356 \u56810 \u55356 \u56824 ',\
+      'Guatemala': '\uc0\u55356 \u56812 \u55356 \u56825 ', 'Honduras': '\u55356 \u56813 \u55356 \u56819 ', 'M\'e9xico': '\u55356 \u56818 \u55356 \u56829 ', 'Mexico': '\u55356 \u56818 \u55356 \u56829 ', 'Nicaragua': '\u55356 \u56819 \u55356 \u56814 ',\
+      'Panam\'e1': '\uc0\u55356 \u56821 \u55356 \u56806 ', 'Paraguay': '\u55356 \u56821 \u55356 \u56830 ', 'Per\'fa': '\u55356 \u56821 \u55356 \u56810 ', 'Peru': '\u55356 \u56821 \u55356 \u56810 ', 'Puerto Rico': '\u55356 \u56821 \u55356 \u56823 ',\
+      'Rep\'fablica Dominicana': '\uc0\u55356 \u56809 \u55356 \u56820 ', 'Uruguay': '\u55356 \u56826 \u55356 \u56830 ', 'Venezuela': '\u55356 \u56827 \u55356 \u56810 '\
+    \};\
+    return flags[countryName.trim()] || '\uc0\u55356 \u57102 ';\
+  \}, []);\
+\
+  const showMsg = useCallback((text) => \{\
+    setToast(text);\
+    setTimeout(() => setToast(null), 2500);\
+  \}, []);\
+\
+  const handleCountryChange = useCallback((e) => \{\
+    setFilters(prev => (\{ ...prev, country: e.target.value, searchId: '' \}));\
+    setCurrentIndex(0);\
+    setSearchTerm('');\
+  \}, []);\
+\
+  // --- L\'d3GICA DE FILTRADO Y ESTAD\'cdSTICAS ---\
+  const countries = useMemo(() => \{\
+    return [...new Set(universities.map(u => u.country.trim()))].filter(Boolean).sort();\
+  \}, [universities]);\
+\
+  const filteredUnis = useMemo(() => \{\
+    const selectedRange = ALUMNI_RANGES[filters.alumniRangeIndex || 0];\
+    return universities.filter(u => \{\
+      const matchCountry = !filters.country || u.country.trim() === filters.country;\
+      const matchRange = u.alumni >= selectedRange.min && u.alumni <= selectedRange.max;\
+      const matchSearch = !filters.searchId || u.id.toString() === filters.searchId;\
+      return matchCountry && matchRange && matchSearch;\
+    \}).sort((a, b) => (b.alumni - a.alumni) || (a.id - b.id));\
+  \}, [universities, filters]);\
+\
+  const currentUni = useMemo(() => filteredUnis[currentIndex], [filteredUnis, currentIndex]);\
+\
+  const universityOptionsForDropdown = useMemo(() => \{\
+    const selectedRange = ALUMNI_RANGES[filters.alumniRangeIndex || 0];\
+    return universities\
+      .filter(u => \{\
+        const matchCountry = !filters.country || u.country.trim() === filters.country;\
+        const matchRange = u.alumni >= selectedRange.min && u.alumni <= selectedRange.max;\
+        return matchCountry && matchRange;\
+      \})\
+      .sort((a, b) => a.name.localeCompare(b.name));\
+  \}, [universities, filters.country, filters.alumniRangeIndex]);\
+\
+  const globalStats = useMemo(() => \{\
+    const total = universities.length;\
+    if (total === 0) return \{ completed: 0, inProgress: 0, pending: 0, total: 0, pCompleted: 0, pInProgress: 0 \};\
+    const completedCount = universities.filter(u => u.completed).length;\
+    const inProgressCount = universities.filter(u => !u.completed && (u.segments?.length || 0) > 0).length;\
+    return \{\
+      completed: completedCount,\
+      inProgress: inProgressCount,\
+      pending: total - completedCount - inProgressCount,\
+      total,\
+      pCompleted: (completedCount / total) * 100,\
+      pInProgress: (inProgressCount / total) * 100\
+    \};\
+  \}, [universities]);\
+\
+  const rangeStats = useMemo(() => \{\
+    return ALUMNI_RANGES.slice(1).map(range => \{\
+      const unisInRange = universities.filter(u => u.alumni >= range.min && u.alumni <= range.max);\
+      const total = unisInRange.length;\
+      const completed = unisInRange.filter(u => u.completed).length;\
+      return \{\
+        label: range.label, total, completed, remaining: total - completed,\
+        percentage: total > 0 ? ((completed / total) * 100).toFixed(1) : "0.0"\
+      \};\
+    \});\
+  \}, [universities]);\
+\
+  const countryDetailStats = useMemo(() => \{\
+    const map = \{\};\
+    universities.forEach(u => \{\
+      const c = u.country.trim() || "Desconocido";\
+      if (!map[c]) map[c] = \{ total: 0, completed: 0 \};\
+      map[c].total++;\
+      if (u.completed) map[c].completed++;\
+    \});\
+    return Object.entries(map).map(([name, data]) => (\{\
+      name, total: data.total, completed: data.completed,\
+      percentage: data.total > 0 ? ((data.completed / data.total) * 100).toFixed(1) : "0.0",\
+      remaining: data.total - data.completed\
+    \})).sort((a, b) => b.total - a.total);\
+  \}, [universities]);\
+\
+  const processedSegmentsList = useMemo(() => \{\
+    const list = [];\
+    universities.forEach(u => \{\
+      u.segments?.forEach(s => \{\
+        list.push(\{ university: u.name, country: u.country, regions: s.name, alumni: s.count, url: s.url \});\
+      \});\
+    \});\
+    return list;\
+  \}, [universities]);\
+\
+  const currentProcessedSum = useMemo(() => \{\
+    if (!currentUni || !currentUni.segments) return 0;\
+    return currentUni.segments.reduce((acc, s) => acc + (parseInt(s.count) || 0), 0);\
+  \}, [currentUni]);\
+\
+  // Nuevas estad\'edsticas filtradas\
+  const filteredProcessedCount = useMemo(() => filteredUnis.filter(u => u.completed).length, [filteredUnis]);\
+  const filteredPendingCount = useMemo(() => filteredUnis.length - filteredProcessedCount, [filteredUnis, filteredProcessedCount]);\
+\
+  // --- CALLBACKS DE INTERACCI\'d3N ---\
+  const isOverLimit = useMemo(() => \{\
+    const val = parseInt(countInputValue);\
+    return !isNaN(val) && val > 1000;\
+  \}, [countInputValue]);\
+\
+  const isSelectionEmpty = useMemo(() => Object.keys(selectionMap).length === 0, [selectionMap]);\
+\
+  const selectedCount = useMemo(() => \{\
+    let count = 0;\
+    Object.keys(selectionMap).forEach(k => \{\
+      if (selectionMap[k] === "full") count++;\
+      else if (Array.isArray(selectionMap[k])) count += selectionMap[k].length;\
+    \});\
+    return count;\
+  \}, [selectionMap]);\
+\
+  const handleFilterInteraction = useCallback(() => \{\
+    if (isOverLimit || (lastCountResult && lastCountResult > 1000)) \{\
+      setIsAdjustingFilters(true);\
+      setCountInputValue('');\
+      setLastCountResult(null);\
+    \}\
+  \}, [isOverLimit, lastCountResult]);\
+\
+  const generateUrlString = useCallback((baseUrl, map) => \{\
+    if (!baseUrl) return '';\
+    let clean = baseUrl.split('?')[0]; \
+    if (clean.endsWith('/')) clean = clean.slice(0, -1);\
+    if (!clean.includes('/people')) clean += '/people';\
+    const codes = [];\
+    Object.keys(map).forEach(rCode => \{\
+      if (map[rCode] === "full") codes.push(rCode);\
+      else if (Array.isArray(map[rCode])) codes.push(...map[rCode]);\
+    \});\
+    if (codes.length === 0) return `$\{clean\}/?facetGeoRegion=105646813`;\
+    return `$\{clean\}/?facetGeoRegion=$\{codes.join('%2C')\}`;\
+  \}, []);\
+\
+  const currentGeneratedUrl = useMemo(() => \{\
+    if (!currentUni) return '';\
+    return generateUrlString(currentUni.urlLinked, selectionMap);\
+  \}, [currentUni, selectionMap, generateUrlString]);\
+\
+  const handleOpenLinkedIn = useCallback(() => \{\
+    if (currentGeneratedUrl) \{ window.open(currentGeneratedUrl, '_blank'); setIsWaitingForCount(true); \}\
+  \}, [currentGeneratedUrl]);\
+\
+  const handleExplore = useCallback(() => \{\
+    if (currentGeneratedUrl) \{ window.open(currentGeneratedUrl, '_blank'); setLastCountResult(null); setIsAdjustingFilters(false); setCountInputValue(''); \}\
+  \}, [currentGeneratedUrl]);\
+\
+  const nextUni = useCallback(() => \{ if (currentIndex < filteredUnis.length - 1) setCurrentIndex(prev => prev + 1); \}, [currentIndex, filteredUnis]);\
+  const prevUni = useCallback(() => \{ if (currentIndex > 0) setCurrentIndex(prev => prev - 1); \}, [currentIndex]);\
+\
+  const cancelEntry = useCallback(() => \{ setIsWaitingForCount(false); setCountInputValue(''); setLastCountResult(null); setIsAdjustingFilters(false); \}, []);\
+\
+  // --- HANDLERS DE CCAA ---\
+  const toggleRegionFunc = useCallback((code) => \{ \
+    handleFilterInteraction(); \
+    setSelectionMap(prev => \{ const next = \{ ...prev \}; if (next[code]) delete next[code]; else next[code] = "full"; return next; \}); \
+  \}, [handleFilterInteraction]);\
+\
+  const toggleCityFunc = useCallback((rCode, cCode) => \{\
+    handleFilterInteraction();\
+    setSelectionMap(prev => \{\
+      const next = \{ ...prev \};\
+      const region = REGIONS_DATA.find(r => r.code === rCode);\
+      const current = next[rCode];\
+      if (current === "full") next[rCode] = region.cities.map(c => c.code).filter(c => c !== cCode);\
+      else if (Array.isArray(current)) \{\
+        if (current.includes(cCode)) \{\
+          const filtered = current.filter(c => c !== cCode);\
+          if (filtered.length === 0) delete next[rCode]; else next[rCode] = filtered;\
+        \} else \{\
+          const updated = [...current, cCode];\
+          if (updated.length === region.cities.length) next[rCode] = "full"; else next[rCode] = updated;\
+        \}\
+      \} else next[rCode] = [cCode];\
+      return next;\
+    \});\
+  \}, [handleFilterInteraction]);\
+\
+  const deselectAllRemaining = useCallback(() => \{ handleFilterInteraction(); setSelectionMap(\{\}); \}, [handleFilterInteraction]);\
+  const selectAllRemaining = useCallback(() => \{ \
+    handleFilterInteraction(); \
+    const nextMap = \{\}; \
+    const currentCovered = new Set(currentUni?.segments?.flatMap(s => s.codes || []) || []);\
+    REGIONS_DATA.forEach(r => \{ \
+      if (!currentCovered.has(r.code)) nextMap[r.code] = "full"; \
+    \}); \
+    setSelectionMap(nextMap); \
+  \}, [handleFilterInteraction, currentUni]);\
+\
+  // --- EFECTOS ---\
+  useEffect(() => \{\
+    const saved = localStorage.getItem('geolinker_v5_final_db_v38');\
+    if (saved) \{\
+      try \{ setUniversities(JSON.parse(saved)); \} catch (e) \{ console.error("Error loading", e); \}\
+    \}\
+  \}, []);\
+\
+  useEffect(() => \{\
+    if (universities.length > 0) localStorage.setItem('geolinker_v5_final_db_v38', JSON.stringify(universities));\
+  \}, [universities]);\
+\
+  useEffect(() => \{\
+    if (currentUni) \{\
+      const initialMap = \{\};\
+      const coveredCodesSet = new Set(currentUni.segments?.flatMap(s => s.codes || []) || []);\
+      REGIONS_DATA.forEach(r => \{\
+        if (!coveredCodesSet.has(r.code)) \{\
+          const remainingCities = r.cities.filter(c => !coveredCodesSet.has(c.code));\
+          if (remainingCities.length === r.cities.length || r.cities.length === 0) \{\
+            initialMap[r.code] = "full";\
+          \} else if (remainingCities.length > 0) \{\
+            initialMap[r.code] = remainingCities.map(c => c.code);\
+          \}\
+        \}\
+      \});\
+      setSelectionMap(initialMap);\
+      setLastCountResult(null);\
+      setIsWaitingForCount(false);\
+      setCountInputValue('');\
+      setIsAdjustingFilters(false);\
+    \}\
+  \}, [currentUni]);\
+\
+  // --- MANEJADORES ---\
+  const handleImportCSV = (e) => \{\
+    const file = e.target.files[0];\
+    if (!file) return;\
+    const reader = new FileReader();\
+    reader.onload = (event) => \{\
+      const rows = event.target.result.split(/\\r?\\n/).filter(r => r.trim() !== "");\
+      const data = [];\
+      const clean = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';\
+      for (let i = 1; i < rows.length; i++) \{\
+        const cols = rows[i].split(/,(?=(?:(?:[^"]*")\{2\})*[^"]*$)/);\
+        if (cols.length >= 3) \{\
+          const name = clean(cols[1]);\
+          if (name) data.push(\{ id: i, name, country: clean(cols[0]) || "N/A", urlLinked: clean(cols[2]), alumni: parseInt(clean(cols[4] || cols[3])) || 0, completed: false, segments: [] \});\
+        \}\
+      \}\
+      if (data.length > 0) \{ setUniversities(data); setCurrentIndex(0); setFilters(\{ country: '', minAlumni: 0, alumniRangeIndex: 0, searchId: '' \}); showMsg(`\uc0\u9989  Cargadas`); \}\
+    \};\
+    reader.readAsText(file);\
+  \};\
+\
+  const confirmSegment = () => \{\
+    const count = parseInt(countInputValue);\
+    if (isNaN(count)) return;\
+    setLastCountResult(count);\
+    if (count > 1000) return;\
+\
+    const segmentCodes = [];\
+    Object.keys(selectionMap).forEach(k => \{\
+      if (selectionMap[k] === "full") \{\
+        segmentCodes.push(k);\
+        const reg = REGIONS_DATA.find(r => r.code === k);\
+        if (reg.cities) segmentCodes.push(...reg.cities.map(c => c.code));\
+      \} else if (Array.isArray(selectionMap[k])) segmentCodes.push(...selectionMap[k]);\
+    \});\
+\
+    const newUnis = [...universities];\
+    const targetIdx = newUnis.findIndex(u => u.id === currentUni.id);\
+    const segmentNames = Object.keys(selectionMap).map(k => \{\
+      const r = REGIONS_DATA.find(x => x.code === k);\
+      return selectionMap[k] === "full" ? r.name : `$\{r.name\} (Parcial)`;\
+    \});\
+\
+    const updatedUni = \{ ...newUnis[targetIdx] \};\
+    updatedUni.segments = [...(updatedUni.segments || []), \{ name: segmentNames.join(", ") || "Manual", url: currentGeneratedUrl, count, codes: segmentCodes \}];\
+    \
+    // --- L\'d3GICA DE COMPLETITUD (NUM\'c9RICA O GEOGR\'c1FICA) ---\
+    const newSum = updatedUni.segments.reduce((acc, s) => acc + s.count, 0);\
+    \
+    // Recopilar todos los c\'f3digos guardados en el historial de la universidad\
+    const allCoveredCodes = new Set(updatedUni.segments.flatMap(s => s.codes || []));\
+    \
+    // Verificar si CADA regi\'f3n en REGIONS_DATA est\'e1 cubierta\
+    const allRegionsCovered = REGIONS_DATA.every(r => \{\
+      // 1. Si el c\'f3digo de la regi\'f3n existe directamente en los guardados (e.g. "Andaluc\'eda" full)\
+      if (allCoveredCodes.has(r.code)) return true;\
+      \
+      // 2. Si no, verificamos si TIENE ciudades y si TODAS est\'e1n cubiertas\
+      if (r.cities && r.cities.length > 0) \{\
+        return r.cities.every(c => allCoveredCodes.has(c.code));\
+      \}\
+      \
+      // 3. Si no tiene ciudades y no est\'e1 el c\'f3digo de regi\'f3n, no est\'e1 cubierta\
+      return false;\
+    \});\
+\
+    // Condici\'f3n final: O llegamos al n\'famero meta, O cubrimos todo el mapa\
+    if (newSum >= updatedUni.alumni || allRegionsCovered) \{ \
+      updatedUni.completed = true; \
+      showMsg("\uc0\u9989  Completada"); \
+    \} else \{\
+      showMsg("\uc0\u9989  Guardado");\
+    \}\
+\
+    newUnis[targetIdx] = updatedUni;\
+    setUniversities(newUnis);\
+    setIsWaitingForCount(false);\
+    setCountInputValue('');\
+    setLastCountResult(null);\
+    setIsAdjustingFilters(false);\
+\
+    if (updatedUni.completed && currentIndex < filteredUnis.length - 1) \{\
+      setTimeout(() => \{ nextUni(); showMsg("\uc0\u10145 \u65039  Siguiente..."); \}, 1500);\
+    \}\
+  \};\
+\
+  const selectSuggestion = (uni) => \{ \
+    setFilters(prev => (\{ ...prev, searchId: uni.id.toString(), country: uni.country \})); \
+    setSearchTerm(''); \
+    setIsDropdownOpen(false); \
+    setCurrentIndex(0); \
+  \};\
+  const resetCurrentUni = () => \{ if (!window.confirm("\'bfReiniciar progreso?")) return; const newUnis = [...universities]; const idx = newUnis.findIndex(u => u.id === currentUni.id); newUnis[idx].segments = []; newUnis[idx].completed = false; setUniversities(newUnis); \};\
+\
+  // Sugerencias\
+  const suggestionsList = useMemo(() => \{\
+    if (!searchTerm.trim()) return [];\
+    return universities\
+      .filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()))\
+      .sort((a, b) => a.name.localeCompare(b.name))\
+      .slice(0, 10);\
+  \}, [universities, searchTerm]);\
+\
+  // --- RENDER REGION ---\
+  const RegionItem = (\{ region \}) => \{\
+    const status = selectionMap[region.code];\
+    const isExpanded = expandedRegions.includes(region.code);\
+    const currentCovered = new Set(currentUni?.segments?.flatMap(s => s.codes || []) || []);\
+    const isCovered = currentCovered.has(region.code) && status !== "full" && !Array.isArray(status);\
+    \
+    return (\
+      <div className=\{`mb-1 transition-opacity $\{isCovered ? 'opacity-30' : ''\}`\}>\
+        <div className="flex items-center gap-2 text-white">\
+          <button onClick=\{() => toggleRegionFunc(region.code)\} className=\{`flex-1 flex items-center justify-between p-2.5 rounded-xl border text-xs font-bold transition-all $\{status ? 'bg-blue-600/20 border-blue-500 text-blue-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'\}`\}>\
+            <span className="truncate">\{region.name\} \{Array.isArray(status) ? `($\{status.length\})` : ''\}</span>\
+            \{status && <Check size=\{14\} />\}\
+          </button>\
+          \{region.cities.length > 0 && (\
+            <button onClick=\{() => setExpandedRegions(prev => isExpanded ? prev.filter(c => c !== region.code) : [...prev, region.code])\} className=\{`p-2.5 rounded-xl border transition-all $\{isExpanded ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'bg-slate-800 border-slate-700 text-slate-500'\}`\}>\
+              <ChevronDown size=\{14\} className=\{isExpanded ? 'rotate-180' : ''\} />\
+            </button>\
+          )\}\
+        </div>\
+        \{isExpanded && (\
+          <div className="ml-4 mt-1 border-l border-slate-700 space-y-1 pl-2 text-white">\
+            \{region.cities.map(city => \{\
+              const active = status === "full" || (Array.isArray(status) && status.includes(city.code));\
+              const cityCovered = currentCovered.has(city.code);\
+              return (\
+                <button key=\{city.code\} onClick=\{() => toggleCityFunc(region.code, city.code)\} className=\{`block w-full text-left p-1.5 rounded text-[10px] border transition-all $\{active ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-transparent text-slate-500'\} $\{cityCovered ? 'line-through opacity-30' : ''\}`\}>\
+                  \{city.name\} \{cityCovered && '\uc0\u10003 '\}\
+                </button>\
+              );\
+            \})\}\
+          </div>\
+        )\}\
+      </div>\
+    );\
+  \};\
+\
+  // --- KEYBOARD ---\
+  useEffect(() => \{\
+    const handleKeys = (e) => \{\
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;\
+      if (e.code === 'Space') \{ e.preventDefault(); if (!isWaitingForCount && !isSelectionEmpty) handleOpenLinkedIn(); \}\
+      if (e.key === 'ArrowRight') nextUni();\
+      if (e.key === 'ArrowLeft') prevUni();\
+    \};\
+    window.addEventListener('keydown', handleKeys);\
+    return () => window.removeEventListener('keydown', handleKeys);\
+  \}, [handleOpenLinkedIn, nextUni, prevUni, isWaitingForCount, isSelectionEmpty]);\
+\
+  return (\
+    <div className="app-container min-h-screen bg-slate-950 text-slate-200 antialiased font-sans flex flex-col custom-scrollbar overflow-y-auto">\
+      <style>\{styleSheet\}</style>\
+      \
+      \{/* MODAL DATOS */\}\
+      \{showDataModal && (\
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[160] flex items-center justify-center p-4">\
+          <div className="bg-slate-900 border border-slate-700 rounded-[2rem] w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">\
+            <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-800/20 text-white">\
+              <h3 className="text-2xl font-black flex items-center gap-3"><Database className="text-blue-500" /> Datos Procesados</h3>\
+              <div className="flex gap-2">\
+                <button onClick=\{() => \{ const blob = new Blob([JSON.stringify(universities)], \{ type: 'application/json' \}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup.json`; a.click(); \}\} className="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-black">JSON</button>\
+                <button onClick=\{() => \{ let csv = "\\uFEFFUniversidad,Pa\'eds,Segmento,Alumni,URL\\n"; universities.forEach(u => u.segments?.forEach(s => csv += `"$\{u.name\}","$\{u.country\}","$\{s.name\}",$\{s.count\},"$\{s.url\}"\\n`)); const blob = new Blob([csv], \{ type: 'text/csv;charset=utf-8' \}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `segmentacion.csv`; a.click(); \}\} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-black">CSV</button>\
+                <button onClick=\{() => setShowDataModal(false)\} className="p-2 ml-4 hover:bg-slate-800 rounded-full text-white"><X size=\{20\} /></button>\
+              </div>\
+            </div>\
+            <div className="flex-1 overflow-auto custom-scrollbar">\
+              <table className="w-full text-left text-sm text-white">\
+                <thead className="bg-slate-800/50 sticky top-0 backdrop-blur-md">\
+                  <tr className="text-[10px] text-slate-500 uppercase font-black tracking-widest"><th className="p-6">Universidad</th><th className="p-6">Segmento</th><th className="p-6 text-center">Alumni</th><th className="p-6 text-right">Link</th></tr>\
+                </thead>\
+                <tbody className="divide-y divide-slate-800">\
+                  \{universities.flatMap(u => u.segments?.map((s, i) => (\
+                    <tr key=\{`$\{u.id\}-$\{i\}`\} className="hover:bg-slate-800/30">\
+                      <td className="p-4 font-bold pl-6">\{u.name\}</td>\
+                      <td className="p-4 text-slate-400 italic text-xs">\{s.name\}</td>\
+                      <td className="p-4 text-center font-mono text-emerald-500 font-black">\{s.count\}</td>\
+                      <td className="p-4 text-right pr-6"><a href=\{s.url\} target="_blank" rel="noreferrer" className="text-blue-500 p-2"><ExternalLink size=\{14\} /></a></td>\
+                    </tr>\
+                  )) || [])\}\
+                </tbody>\
+              </table>\
+            </div>\
+          </div>\
+        </div>\
+      )\}\
+\
+      \{/* MODAL STATS */\}\
+      \{showStatsModal && (\
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[150] flex items-center justify-center p-4">\
+          <div className="bg-slate-900 border border-slate-700 rounded-[2rem] w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">\
+            <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-800/20 text-white">\
+              <h3 className="text-2xl font-black flex items-center gap-3"><TrendingUp className="text-blue-500" /> Estad\'edsticas Detalladas</h3>\
+              <button onClick=\{() => setShowStatsModal(false)\} className="p-2 text-white"><X size=\{24\} /></button>\
+            </div>\
+            <div className="p-8 overflow-y-auto custom-scrollbar space-y-12">\
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">\
+                <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800"><div className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-1">Realizadas</div><div className="text-4xl font-mono font-black">\{globalStats.completed\}</div><div className="text-slate-600 text-xs mt-2 font-bold">\{globalStats.pCompleted.toFixed(1)\}%</div></div>\
+                <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800"><div className="text-amber-500 text-[10px] font-black uppercase tracking-widest mb-1">En Proceso</div><div className="text-4xl font-mono font-black">\{globalStats.inProgress\}</div></div>\
+                <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800"><div className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Restantes</div><div className="text-4xl font-mono font-black">\{globalStats.pending\}</div></div>\
+              </div>\
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden">\
+                <table className="w-full text-left text-xs text-white">\
+                  <thead className="bg-slate-800/30 text-slate-500 uppercase font-black tracking-widest">\
+                    <tr><th className="p-4">Rango</th><th className="p-4 text-center">Avance (%)</th><th className="p-4 text-center">Hechas / Total</th><th className="p-4 text-right">Restantes</th></tr>\
+                  </thead>\
+                  <tbody className="divide-y divide-slate-800">\
+                    \{rangeStats.map((r, idx) => (\
+                      <tr key=\{idx\} className="hover:bg-slate-900/50 transition-colors">\
+                        <td className="p-4 font-bold text-slate-200">\{r.label\}</td>\
+                        <td className="p-4"><div className="flex items-center justify-center gap-3"><div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style=\{\{ width: `$\{r.percentage\}%` \}\}></div></div><span className="font-mono text-blue-400 font-bold">\{r.percentage\}%</span></div></td>\
+                        <td className="p-4 text-center font-mono text-slate-400">\{r.completed\} / \{r.total\}</td>\
+                        <td className="p-4 text-right font-mono font-bold text-slate-500">\{r.remaining\}</td>\
+                      </tr>\
+                    ))\}\
+                  </tbody>\
+                </table>\
+              </div>\
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden">\
+                <table className="w-full text-left text-xs text-white">\
+                  <thead className="bg-slate-800/30 text-slate-500 uppercase font-black tracking-widest">\
+                    <tr><th className="p-4 text-slate-500 uppercase tracking-widest">Pa\'eds</th><th className="p-4 text-center text-slate-500 uppercase tracking-widest">Avance (%)</th><th className="p-4 text-right text-slate-500 uppercase tracking-widest">Quedan</th></tr>\
+                  </thead>\
+                  <tbody className="divide-y divide-slate-800">\
+                    \{countryDetailStats.map((c, idx) => (\
+                      <tr key=\{idx\} className="hover:bg-slate-900/50 transition-colors">\
+                        <td className="p-4 flex items-center gap-3"><span className="text-lg">\{getFlagEmoji(c.name)\}</span><span className="font-bold text-slate-200">\{c.name\}</span></td>\
+                        <td className="p-4"><div className="flex items-center justify-center gap-3"><div className="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style=\{\{ width: `$\{c.percentage\}%` \}\}></div></div><span className="font-mono text-blue-400 font-bold">\{c.percentage\}%</span></div></td>\
+                        <td className="p-4 text-right font-mono font-bold text-slate-500">\{c.remaining\}</td>\
+                      </tr>\
+                    ))\}\
+                  </tbody>\
+                </table>\
+              </div>\
+            </div>\
+          </div>\
+        </div>\
+      )\}\
+\
+      <header className="flex flex-col md:flex-row justify-between items-center gap-6 p-8 border-b border-slate-900 shrink-0 text-white">\
+        <h1 className="text-2xl font-black tracking-tighter flex items-center gap-2"><span className="text-blue-500">LATAM</span>CONNECT <span className="text-slate-600 text-sm font-mono tracking-normal">- Internal Tool</span></h1>\
+        <div className="flex flex-wrap gap-2">\
+          <button onClick=\{() => setShowDataModal(true)\} className="px-4 py-2 bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-600/20 transition-all shadow-md"><Table size=\{16\} /> Datos</button>\
+          <button onClick=\{() => setShowStatsModal(true)\} className="px-4 py-2 bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-600/20 transition-all shadow-md"><BarChart3 size=\{16\} /> Stats</button>\
+          <label className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2 cursor-pointer hover:bg-blue-500 transition-all shadow-md"><Upload size=\{16\} /> Importar<input type="file" className="hidden" accept=".csv" onChange=\{handleImportCSV\} /></label>\
+        </div>\
+      </header>\
+\
+      \{/* FILTROS */\}\
+      <section className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 m-4 shadow-xl shrink-0 text-white">\
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">\
+          <div className="md:col-span-3">\
+            <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest leading-none">1. Pa\'eds</label>\
+            <select className="w-full bg-slate-800 border-slate-700 rounded-xl py-3 px-4 font-bold text-white outline-none focus:border-blue-500 appearance-none" value=\{filters.country\} onChange=\{handleCountryChange\}>\
+              <option value="">Todos</option>\{countries.map(c => <option key=\{c\} value=\{c\}>\{c\}</option>)\}\
+            </select>\
+          </div>\
+          <div className="md:col-span-4">\
+            <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest leading-none">2. Universidad</label>\
+            <div className="relative">\
+              <select className="w-full bg-slate-800 border-slate-700 rounded-xl py-3 px-4 pr-10 font-bold text-white outline-none focus:border-blue-500 appearance-none truncate" value=\{filters.searchId\} onChange=\{e => \{ setFilters(prev => (\{...prev, searchId: e.target.value\})); setCurrentIndex(0); \}\}>\
+                <option value="">\{filters.country || 'Seleccionar...'\}</option>\
+                \{universityOptionsForDropdown.map(uni => <option key=\{uni.id\} value=\{uni.id\}>\{uni.completed ? '\uc0\u9989 ' : '\u10060 '\} \{uni.name\}</option>)\}\
+              </select>\
+              <ChevronDown className="absolute right-3 top-3 text-slate-500" size=\{18\} />\
+            </div>\
+          </div>\
+          <div className="md:col-span-3">\
+            <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest leading-none">3. Rango Alumni</label>\
+            <select className="w-full bg-slate-800 border-slate-700 rounded-xl py-3 px-4 font-bold text-white outline-none focus:border-blue-500 appearance-none" value=\{filters.alumniRangeIndex\} onChange=\{e => \{ setFilters(prev => (\{...prev, alumniRangeIndex: parseInt(e.target.value)\})); setCurrentIndex(0); \}\}>\
+              \{ALUMNI_RANGES.map((r, i) => <option key=\{i\} value=\{i\}>\{r.label\}</option>)\}\
+            </select>\
+          </div>\
+          \
+          \{/* CAJA DE ESTAD\'cdSTICAS MODIFICADA - AHORA OCUPA 2 FILAS */\}\
+          <div className="md:col-span-2 md:row-span-2 self-stretch">\
+            <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 shadow-inner flex flex-col justify-center h-full gap-2">\
+              <div className="flex flex-col items-center justify-center border-b border-slate-800/50 pb-2 mb-1">\
+                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Total</span>\
+                <span className="text-2xl font-mono font-black text-white leading-none tracking-tighter">\{filteredUnis.length\}</span>\
+              </div>\
+              <div className="flex justify-between items-end gap-2 px-1 mt-auto">\
+                <div className="flex flex-col items-center">\
+                  <div className="flex items-center gap-1.5 mb-1">\
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>\
+                    <span className="text-[9px] font-black text-slate-500 uppercase leading-none">Listas</span>\
+                  </div>\
+                  <span className="text-2xl font-mono font-black text-white leading-none">\{filteredProcessedCount\}</span>\
+                </div>\
+                <div className="w-px h-8 bg-slate-800"></div>\
+                <div className="flex flex-col items-center">\
+                  <div className="flex items-center gap-1.5 mb-1">\
+                    <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>\
+                    <span className="text-[9px] font-black text-slate-500 uppercase leading-none">Pend.</span>\
+                  </div>\
+                  <span className="text-2xl font-mono font-black text-white leading-none">\{filteredPendingCount\}</span>\
+                </div>\
+              </div>\
+            </div>\
+          </div>\
+\
+          \{/* CAJA DE B\'daSQUEDA - ALINEADA A LA REJILLA (Mitad de Universidad) */\}\
+          <div className="md:col-span-5 relative">\
+            <div className="relative">\
+              <input type="text" className="w-full bg-slate-800 border-slate-700 rounded-2xl py-4 pl-12 pr-4 font-bold text-white text-base outline-none focus:border-blue-500 transition-all shadow-xl" placeholder="B\'fasqueda instant\'e1nea..." value=\{searchTerm\} onChange=\{(e) => \{ setSearchTerm(e.target.value); setIsDropdownOpen(true); \}\} onFocus=\{() => setIsDropdownOpen(true)\} />\
+              <Search className="absolute left-4 top-4 text-slate-600" size=\{24\} />\
+            </div>\
+            \{isDropdownOpen && suggestionsList.length > 0 && (\
+              <div className="absolute top-full left-0 w-full bg-slate-800 border border-slate-700 rounded-2xl mt-2 z-50 shadow-2xl overflow-hidden animate-in fade-in duration-200">\
+                \{suggestionsList.map(uni => (\
+                  <button key=\{uni.id\} onClick=\{() => selectSuggestion(uni)\} className="w-full text-left px-5 py-4 hover:bg-slate-700 text-sm flex justify-between items-center border-b border-slate-700 last:border-0"><div className="flex items-center gap-3"><span className="text-lg">\{getFlagEmoji(uni.country)\}</span><span className="font-bold text-slate-200 text-sm">\{uni.name\}</span></div><span className="text-[10px] text-slate-500 font-black uppercase shrink-0">\{uni.country\}</span></button>\
+                ))\}\
+              </div>\
+            )\}\
+          </div>\
+\
+          \{/* BARRA DE PROGRESO INTEGRADA EN EL GRID */\}\
+          \{universities.length > 0 && (\
+            <div className="md:col-span-5 flex flex-col justify-end pb-1 gap-2 pl-4">\
+               <div className="flex items-center justify-between">\
+                 <div className="flex items-center gap-2">\
+                    <PieChart className="text-emerald-500" size=\{18\} />\
+                    <span className="text-sm font-bold tracking-tight text-slate-400">Avance del Proyecto: <span className="text-white font-mono">\{globalStats.completed\} / \{globalStats.total\}</span></span>\
+                 </div>\
+                 <div className="text-xs font-black text-emerald-500">\{globalStats.pCompleted.toFixed(1)\}%</div>\
+               </div>\
+               <div className="relative h-4 w-full bg-slate-800 rounded-full overflow-hidden flex shadow-inner">\
+                  <div className="h-full bg-emerald-500 transition-all duration-1000 ease-out" style=\{\{ width: `$\{globalStats.pCompleted\}%` \}\}></div>\
+                  <div className="h-full bg-amber-500 transition-all duration-1000 ease-out" style=\{\{ width: `$\{globalStats.pInProgress\}%` \}\}></div>\
+               </div>\
+            </div>\
+          )\}\
+        </div>\
+      </section>\
+\
+      \{currentUni ? (\
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4 items-stretch min-h-[600px] text-white flex-1 overflow-hidden">\
+          <aside className="lg:col-span-5 flex flex-col min-h-0">\
+            <div className="flex-1 bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl flex flex-col min-h-0 text-white">\
+              <div className="mb-6 pb-4 border-b border-slate-800 flex justify-between items-center shrink-0">\
+                <h3 className="font-black text-xs text-slate-400 uppercase flex items-center gap-2"><MapPin size=\{18\} className="text-blue-500" /> CCAA Restantes</h3>\
+                <div className="flex gap-2">\
+                  <button onClick=\{selectAllRemaining\} className="text-[10px] bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg font-black border border-blue-600/20 active:scale-95 transition-all">Todas</button>\
+                  <button onClick=\{deselectAllRemaining\} className="text-[10px] bg-slate-800 text-slate-400 px-3 py-1.5 rounded-lg font-black border border-slate-700 active:scale-95 transition-all">Ninguna</button>\
+                </div>\
+              </div>\
+              <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 min-h-0 text-white">\
+                <div className="space-y-1">\{REGIONS_DATA.map(r => <RegionItem key=\{r.code\} region=\{r\} />)\}</div>\
+              </div>\
+            </div>\
+          </aside>\
+\
+          <div className="lg:col-span-7 flex flex-col min-h-0">\
+            <div className="flex-1 bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl border-t-blue-500 border-t-4 flex flex-col min-h-0">\
+              <div className="p-8 bg-slate-800/20 border-b border-slate-800 flex justify-between items-start shrink-0">\
+                <div className="flex flex-col gap-3 text-white">\
+                  <div className="flex items-center gap-2"><span className="text-xl">\{getFlagEmoji(currentUni.country)\}</span><span className="text-[11px] font-black bg-blue-600 text-white px-3 py-1 rounded-md uppercase tracking-wider">\{currentUni.country\}</span></div>\
+                  <h2 className="text-3xl font-black leading-none tracking-tighter">\{currentUni.name\}</h2>\
+                </div>\
+                <div className=\{`px-4 py-2 rounded-2xl font-black text-xs border $\{currentUni.completed ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-amber-500/10 border-amber-500 text-amber-500'\}`\}>\{currentUni.completed ? 'COMPLETADA' : 'EN PROCESO'\}</div>\
+              </div>\
+\
+              <div className="p-8 flex-1 overflow-y-auto custom-scrollbar text-white">\
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">\
+                  <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 text-center shadow-inner"><div className="text-slate-600 text-[10px] font-black uppercase mb-2 leading-none">Meta CSV</div><div className="text-3xl font-mono font-black flex items-center justify-center gap-2 text-white leading-none"><Target size=\{20\} className="text-blue-500" /> \{currentUni.alumni.toLocaleString()\}</div></div>\
+                  <div className=\{`bg-slate-950 p-6 rounded-3xl border border-slate-800 text-center shadow-inner $\{currentProcessedSum >= currentUni.alumni ? 'border-emerald-500/30' : ''\}`\}><div className="text-slate-600 text-[10px] font-black uppercase mb-2 leading-none">Procesado</div><div className=\{`text-3xl font-mono font-black leading-none $\{currentProcessedSum >= currentUni.alumni ? 'text-emerald-500' : 'text-amber-500'\}`\}>\{currentProcessedSum.toLocaleString()\}</div></div>\
+                  <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 text-center shadow-inner"><div className="text-slate-600 text-[10px] font-black uppercase mb-2 leading-none">Resto</div><div className="text-3xl font-mono font-black text-slate-500 leading-none">\{Math.max(0, currentUni.alumni - currentProcessedSum).toLocaleString()\}</div></div>\
+                </div>\
+\
+                \{!isWaitingForCount ? (\
+                  <div className="p-10 bg-blue-600/5 rounded-[2.5rem] border-2 border-blue-500/20 text-center mb-10">\
+                    <h3 className="text-xl font-bold text-white mb-6">Paso 1: Abrir LinkedIn</h3>\
+                    \{!isSelectionEmpty ? <button onClick=\{handleOpenLinkedIn\} className="w-full max-w-md mx-auto py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xl shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all"><ExternalLink size=\{24\} /> VER EX-ALUMNOS</button> : <div className="p-8 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700 text-slate-500 text-sm font-bold uppercase tracking-widest">Selecciona zonas para empezar</div>\}\
+                  </div>\
+                ) : (\
+                  <div className="p-10 bg-emerald-600/5 rounded-[2.5rem] border-2 border-emerald-500/30 text-center mb-10 animate-in slide-in-from-bottom-4 duration-500">\
+                    \{isAdjustingFilters ? (\
+                      <div><h3 className="text-xl font-bold text-blue-400 mb-2 uppercase tracking-tight flex items-center justify-center gap-3"><Layers size=\{24\} /> Ajuste</h3><div className="text-4xl font-mono font-black my-6 drop-shadow-lg text-white">\{selectedCount\} <span className="text-lg text-slate-500 font-sans uppercase">CCAA Seleccionadas</span></div><button onClick=\{handleExplore\} className="w-full max-w-md py-5 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-2xl flex items-center justify-center gap-3 mx-auto transition-all active:scale-95 uppercase tracking-tighter shadow-blue-900/40 text-white">EXPLORAR</button></div>\
+                    ) : (\
+                      <div className="text-white">\
+                        <h3 className="text-xl font-bold mb-2">Paso 2: Resultados</h3>\
+                        <div className="flex flex-col items-center gap-5 max-w-md mx-auto mt-6">\
+                          <div className="relative w-full">\
+                            <input type="number" autoFocus placeholder="Ej: 847" className="w-full bg-slate-950 border-2 border-slate-700 py-6 px-8 rounded-3xl text-4xl font-mono font-black text-white text-center outline-none focus:border-emerald-500 transition-all shadow-2xl shadow-black/50" value=\{countInputValue\} onChange=\{e => setCountInputValue(e.target.value)\} onKeyDown=\{e => e.key === 'Enter' && !isOverLimit && confirmSegment()\} /><div className="absolute top-1/2 -translate-y-1/2 right-8 text-slate-700"><Plus size=\{32\} /></div>\
+                          </div>\
+                          \{!isOverLimit && countInputValue !== '' && <button onClick=\{confirmSegment\} className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-xl shadow-2xl active:scale-95 transition-all text-white">Registrar Cantidad</button>\}\
+                          \{isOverLimit && <div className="w-full p-6 bg-red-500/10 border-2 border-red-500/30 rounded-2xl text-red-500 text-sm font-black flex items-center justify-center gap-3 uppercase tracking-tight shadow-xl shadow-red-900/10 animate-pulse"><AlertTriangle size=\{24\} /> El resultado supera los 1000 ex alumnos.</div>\}\
+                        </div>\
+                      </div>\
+                    )\}\
+                    <button onClick=\{cancelEntry\} className="text-slate-500 hover:text-slate-300 text-[10px] font-black uppercase tracking-widest mt-8 transition-colors text-white">Cancelar</button>\
+                  </div>\
+                )\}\
+\
+                \{currentUni.segments?.length > 0 && (\
+                  <div className="space-y-4">\
+                    <div className="flex justify-between items-center px-4"><h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest text-white">Registro Acumulado</h4><button onClick=\{resetCurrentUni\} className="p-2 text-slate-600 hover:text-red-500 transition-colors"><Trash2 size=\{16\} /></button></div>\
+                    <div className="grid grid-cols-1 gap-2">\
+                      \{currentUni.segments.map((s, i) => (\
+                        <div key=\{i\} className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-2xl">\
+                          <div className="min-w-0 flex-1 pr-6 text-white"><div className="text-xs font-black truncate uppercase">\{s.name\}</div><div className="text-[10px] text-slate-600 font-mono truncate mt-1">\{s.url\}</div></div>\
+                          <div className="shrink-0 px-4 py-2 bg-emerald-500/10 text-emerald-500 rounded-xl font-mono font-black text-sm border border-emerald-500/20 shadow-inner">+\{s.count\}</div>\
+                        </div>\
+                      ))\}\
+                    </div>\
+                  </div>\
+                )\}\
+              </div>\
+\
+              <div className="p-6 bg-slate-950/40 border-t border-slate-800 flex justify-between gap-4 shrink-0 text-white">\
+                <button onClick=\{prevUni\} disabled=\{currentIndex === 0\} className="flex-1 py-4 px-6 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 font-black hover:bg-slate-700 disabled:opacity-20 transition-all flex items-center justify-center gap-3 text-sm uppercase shadow-xl shadow-black/20 tracking-widest">Anterior</button>\
+                <button onClick=\{nextUni\} disabled=\{currentIndex === filteredUnis.length - 1\} className="flex-1 py-4 px-6 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue-500 disabled:opacity-20 transition-all flex items-center justify-center gap-3 text-sm uppercase shadow-xl shadow-blue-900/20 tracking-widest">Siguiente</button>\
+              </div>\
+            </div>\
+          </div>\
+        </main>\
+      ) : (\
+        <div className="h-[60vh] flex flex-col items-center justify-center text-slate-700 border-4 border-dashed border-slate-900 rounded-[3rem] mx-4 text-center shrink-0 animate-pulse"><GraduationCap size=\{100\} className="mb-6 opacity-10" /><h2 className="text-2xl font-black uppercase tracking-tighter text-white">Importa un CSV para empezar</h2></div>\
+      )\}\
+\
+      \{/* PIE DE P\'c1GINA */\}\
+      <footer className="mt-12 py-8 px-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 shrink-0">\
+        <div className="flex items-center gap-2 text-sm font-medium">\
+          made with <Heart size=\{14\} className="text-red-500 fill-red-500" /> & \uc0\u55357 \u56490 \
+        </div>\
+        <div className="flex gap-6 items-center">\
+          <a href="https://latamconnect.es" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">\
+            <Globe size=\{14\} /> Web\
+          </a>\
+          <a href="https://www.linkedin.com/company/latam-connect" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">\
+            <Linkedin size=\{14\} /> LinkedIn Company\
+          </a>\
+          <a href="https://www.linkedin.com/in/miguel-carrone-latamconnect" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest border-l border-slate-800 pl-6">\
+            <Linkedin size=\{14\} /> Miguel Carrone\
+          </a>\
+        </div>\
+      </footer>\
+    </div>\
+  );\
+\}}
